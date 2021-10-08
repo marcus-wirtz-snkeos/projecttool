@@ -1,0 +1,74 @@
+#!/bin/bash
+# bash functions for projecttool
+
+PROJECTTOOL_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+PROJ_CONFIG=".projconfig"
+
+# colors
+Color_Off='\e[0m'       # Text Reset
+Red='\e[0;31m'          # Red
+Green='\e[0;32m'        # Green
+Yellow='\e[0;33m'       # Yellow
+
+mkproj() {
+    if [ $# -eq 0 ]; then
+        printf "${Red}At least project name has to be provided for function mkproj!${Color_Off}\n"
+        return 1
+    fi
+
+    DIR=$PROJECTTOOL_PATH"/projects/"$1
+    if [ -d "$DIR" ]; then
+        printf "${Red}Project '${1}' already exists!${Color_Off}\n"
+    else
+        printf "Creating new project '${1}'... \n\n"
+        python -m venv $PROJECTTOOL_PATH"/projects/"$1
+        python -m pip install -r $PROJECTTOOL_PATH"/requirements.txt"
+        printf "\n${Green}DONE${Color_Off}\n"
+    fi
+}
+
+proj() {
+    source $PROJECTTOOL_PATH/projects/$1/bin/activate
+}
+
+rmproj() {
+    DIR=$PROJECTTOOL_PATH"/projects/"$1
+    if [ -d "$DIR" ]; then
+        read -p "Really remove project '${1}'? [y/N] " confirm
+        if [ "$confirm" == "Y" ] || [ "$confirm" == "y" ] || [ "$confirm" == "yes" ]; then
+            printf "\nRemoving project '${1}'... \n"
+            rm -r $PROJECTTOOL_PATH/projects/$1/
+            printf "\n${Green}DONE${Color_Off}\n"
+        fi
+    else
+        printf "${Red}Project '${1}' does not exist!${Color_Off}\n"
+    fi
+}
+
+isproj() {
+  if [ "$VIRTUAL_ENV" == "" ] || [[ $VIRTUAL_ENV != $PROJECTTOOL_PATH* ]]; then
+    printf "${Red}Not in a valid project!${Color_Off}\n"
+    return 1
+  else
+    return 0
+  fi
+}
+
+
+initproj() {
+  if isproj; then
+      echo $PWD > $VIRTUAL_ENV/$PROJ_CONFIG
+      printf "Linking project '${Yellow}"$(basename ${VIRTUAL_ENV})"${Color_Off}' to folder:"
+      printf "\n${Green}"$PWD"\n${Color_Off}"
+  fi
+}
+
+lsproj() {
+    ls $@ $PROJECTTOOL_PATH"/projects/"
+}
+
+cdproj() {
+    if isproj; then
+        cd $( cat $VIRTUAL_ENV/$PROJ_CONFIG )
+    fi
+}

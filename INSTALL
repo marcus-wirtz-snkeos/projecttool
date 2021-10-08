@@ -1,0 +1,20 @@
+#!/bin/bash
+
+python -m pip install --user virtualenv
+
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+BASH_TOOLS=$THIS_DIR"/bash_tools"
+
+ADD_ENV_VAR="source ${BASH_TOOLS}"
+BASHRC="/home/${USER}/.bashrc"
+
+if grep -Fxq "$ADD_ENV_VAR" $BASHRC
+then
+    printf "\nprojecttool already set up\n"
+else
+    echo "" >> $BASHRC
+    echo "# Source environment variables and command line functions from projecttool" >> $BASHRC
+    echo $ADD_ENV_VAR >> $BASHRC
+    source $BASH_TOOLS
+    printf "\nset up projecttool successfully\n"
+fi
