@@ -22,7 +22,8 @@ mkproj() {
     else
         printf "Creating new project '${1}'... \n\n"
         python -m venv $PROJECTTOOL_PATH"/projects/"$1
-        python -m pip install -r $PROJECTTOOL_PATH"/base_requirements.txt"
+        $PROJECTTOOL_PATH"/projects/"$1/bin/python -m pip install pip --upgrade
+        $PROJECTTOOL_PATH"/projects/"$1/bin/python -m pip install -r $PROJECTTOOL_PATH"/base_requirements.txt"
         printf "\n${Green}DONE${Color_Off}\n"
     fi
 }
